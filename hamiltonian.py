@@ -295,35 +295,48 @@ class MolecularFermionicHamiltonian(FermionicHamiltonian):
             TwoBody terms.
         """
 
-        h1_mo = h2_mo = None
+        # Diagonalisation of the overlap matrix S.
+        overlap_matrix = mol.intor('int1e_ovlp')
+        # Construct an orthonormal basis
+        overlap_matrix_eigval, overlap_matrix_eigvec = (
+            np.linalg.eigh(overlap_matrix))
+        # Reverse the ordering of eigenvalues.
+        overlap_matrix_eig_order = np.argsort(overlap_matrix_eigval)
+        overlap_matrix_eigvec = overlap_matrix_eigvec[:, overlap_matrix_eig_order]
+        # Linear transformation that takes us from the atomic (ao) to the
+        # orthonormal (oo) basis.
+        ao2oo = overlap_matrix_eigvec/np.sqrt(overlap_matrix_eigval[None, :])
 
-        ################################################################################################################
-        # YOUR CODE HERE
-        # TO COMPLETE (after activity 2.3)
-        # Hint : Make sure the 2 body integrals are in the physicist notation (order) or change the spin_tensor.
-        # accordingly.
-        
-        # Diagonalisation of ovlp and build a transformation toward an orthonormal basis (ao2oo).
-        # TO COMPLETE
+        # Build h1 and h2 in atomic orbital (AO) basis.
+        h1_ao = mol.intor('int1e_kin') + mol.intor('int1e_nuc')
+        h2_ao = mol.intor('int2e')
+        # Transform h1 and h2 into the orthonormal orbital (OO) basis.
+        h1_oo = np.einsum(
+            'mi, nj, mn -> ij',
+            ao2oo, ao2oo, h1_ao)
+        h2_oo = np.einsum(
+            'mi, nj, ok, pl, mnop -> ijkl',
+            ao2oo, ao2oo, ao2oo, ao2oo, h2_ao)
 
-        # Build h1 in AO basis and transform it into OO basis.
-        # TO COMPLETE
+        # Linear transformation that takes us from the orthonormal (oo)
+        # to the molecular (mo) basis.
+        h1_oo_eigval, h1_oo_eigvec = np.linalg.eig(h1_oo)
+        # Reverse the ordering of eigenvalues.
+        # TODO: Check if we indeed need to reverse the ordering here.
+        h1_oo_eig_order = np.argsort(h1_oo_eigval)
+        oo2mo = h1_oo_eigvec[:, h1_oo_eig_order]
 
-        # Find a transformation from OO basis toward MO basis where h1 is diagonal and eigenvalues are in growing order.
-        # TO COMPLETE
-
-        # Transform h1 and h2 from AO to MO basis
-        # TO COMPLETE
-        # h1_mo = 
-        # h2_mo = 
-        ################################################################################################################
+        # Transform h1 and h2 into the molecular orbital (MO) basis.
+        h1_mo = np.einsum(
+            'mi, nj, mn -> ij',
+            oo2mo, oo2mo, h1_oo)
+        h2_mo = np.einsum(
+            'mi, nj, ok, pl, mnop -> ijkl',
+            oo2mo, oo2mo, oo2mo, oo2mo, h2_ao)
 
         # Build the one and two body Hamiltonians
         one_body = OneBodyFermionicHamiltonian(h1_mo)
         two_body = TwoBodyFermionicHamiltonian(h2_mo)
-
-        # Recommended : Make sure that h1_mo is diagonal and that its eigenvalues are sorted in growing order.
-        raise NotImplementedError()
 
         return cls(one_body, two_body)
 
