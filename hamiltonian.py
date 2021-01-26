@@ -122,16 +122,10 @@ class OneBodyFermionicHamiltonian(FermionicHamiltonian):
             OneBodyFermionicHamiltonian: Transformed Hamiltonian.
         """
 
-        new_integrals = None
-
-        ################################################################################################################
-        # YOUR CODE HERE
-        # TO COMPLETE (after activity 2.2)
-        # Hint : make use of np.einsum
-        # new_integrals =
-        ################################################################################################################
-
-        raise NotImplementedError()
+        # Activity 2.2.
+        new_integrals = np.einsum(
+            'mi, nj, mn -> ij',
+            transform, transform, self.integrals)
 
         return OneBodyFermionicHamiltonian(new_integrals, self.with_spin)
 
@@ -205,16 +199,10 @@ class TwoBodyFermionicHamiltonian(FermionicHamiltonian):
             TwoBodyFermionicHamiltonian: Transformed Hamiltonian.
         """
 
-        new_integrals = None
-
-        ################################################################################################################
-        # YOUR CODE HERE
-        # TO COMPLETE (after activity 2.2)
-        # Hint : make use of np.einsum
-        # new_integrals =
-        ################################################################################################################
-
-        raise NotImplementedError()
+        # Activity 2.2.
+        new_integrals = np.einsum(
+            'mi, nj, ok, pl, mnop -> ijkl',
+            transform, transform, transform, transform, self.integrals)
 
         return TwoBodyFermionicHamiltonian(new_integrals, self.with_spin)
 
