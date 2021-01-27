@@ -20,7 +20,7 @@ MODIFIED 24-01-2021 by Brett Henderson <brettrhenderson25@gmail.com>:
 '''
 
 import numpy as np
-# from PauliString import PauliString, LinearCombinaisonPauliString
+from pauli_string import PauliString, LinearCombinaisonPauliString
 
 class FermionicHamiltonian(object):
 
@@ -139,12 +139,23 @@ class OneBodyFermionicHamiltonian(FermionicHamiltonian):
         """        
 
         n_orbs = self.number_of_orbitals()
+        print(f'Num Orbs: {n_orbs}')
         # Since each creation/annihilation operator consist of 2 PauliString for each orbital
         # and we compute ap * am there will be (2*n_orbs)**2 Coefs and PauliStrings
         new_coefs = np.zeros(((2*n_orbs)**2,),dtype = np.complex)
         new_pauli_strings = np.zeros(((2*n_orbs)**2,),dtype = PauliString)
+        print(f"Total number of new ppauli strings: {(2*n_orbs)**2}")
         # TO COMPLETE (after activity 3.1)
-        raise NotImplementedError
+        for i in range(len(aps)):
+            for j in range(len(ams)):
+                term_ij_lcps = aps[i] * ams[j] * self.integrals[i,j]
+                print(f'number of new terms: {len(term_ij_lcps)}')
+                print(f'placing new_terms at index: {4 * (i * len(ams) + j)}')
+                start_idx = 4 * (i * len(ams) + j)
+                new_coefs[start_idx:start_idx+4] = term_ij_lcps.coefs
+                new_pauli_strings[start_idx:start_idx+4] = term_ij_lcps.pauli_strings
+                
+        lcps = LinearCombinaisonPauliString(new_coefs, new_pauli_strings)
         return lcps
 
 
@@ -201,7 +212,18 @@ class TwoBodyFermionicHamiltonian(FermionicHamiltonian):
         new_coefs = np.zeros(((2*n_orbs)**4 ,),dtype = np.complex)
         new_pauli_strings = np.zeros(((2*n_orbs)**4,),dtype = PauliString)
         ## TO COMPLETE (after activity 3.1)
-        raise NotImplementedError
+        for i in range(len(aps)):
+            for j in range(len(aps)):
+                for k in range(len(ams)):
+                    for l in range(len(ams)):
+                        creation_lcps = aps[i] * aps[j]
+                        annihilation_lcps = ams[k] * ams[l]
+                        term_ijkl_lcps = aps[i] * aps[j] * ams[k] * ams[l] * self.integrals[i,j,k,l]
+                        start_idx = 16 * (i * len(aps)**3 + j * len(ams)**2 + k * len(ams) + l)
+                        new_coefs[start_idx:start_idx+16] = term_ijkl_lcps.coefs
+                        new_pauli_strings[start_idx:start_idx+16] = term_ijkl_lcps.pauli_strings
+        lcps = 0.5 * LinearCombinaisonPauliString(new_coefs, new_pauli_strings)
+        
         return lcps
         
 
@@ -276,7 +298,7 @@ class MolecularFermionicHamiltonian(FermionicHamiltonian):
         # Transform h1 and h2 from AO to MO basis
         # TO COMPLETE
         h1_mo = np.einsum('mi,nj,mn->ij', oo2mo, oo2mo, h1_oo)
-        h2_mo = np.einsum('mi,nj,ok,pl,mnop->ijkl', ao2mo, ao2mo, ao2mo, ao2mo, mol.intor("int2e"))
+        h2_mo = np.einsum('mi,nj,ok,pl,mnop->iklj', ao2mo, ao2mo, ao2mo, ao2mo, mol.intor("int2e"))
 
         # Build the one and two body Hamiltonians
         one_body = OneBodyFermionicHamiltonian(h1_mo)
@@ -362,6 +384,8 @@ class MolecularFermionicHamiltonian(FermionicHamiltonian):
         """     
 
         # TO COMPLETE (after activity 3.1)
-        raise NotImplementedError
+        out = (self.one_body.to_linear_combinaison_pauli_string(aps, ams)
+               + self.two_body.to_linear_combinaison_pauli_string(aps, ams))
+        
         return out
 
