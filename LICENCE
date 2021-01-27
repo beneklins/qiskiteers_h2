@@ -16,7 +16,11 @@ see <https://www.gnu.org/licenses/>
 the work by Maxime Dion, originally licensed under the Apache Licence,
 version 2.0. The following files are derivatives and/or were modified
 from Maxime Dion's original work:
+· evaluator.py
 · hamiltonian.py
+· mapping.py
+· pauli_string.py
+· solver.py
 See the section Apache below for the licence of the original work.
 
 Apache
