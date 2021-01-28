@@ -704,7 +704,8 @@ class LinearCombinaisonPauliString(object):
         # Hints : sum all the matrices of all PauliStrings weighted by their coef
         ################################################################################################################
 
-        matrix = sum([self.coefs[i]*self.pauli_strings[i].to_matrix() for i in range(self.n_terms)])
+        for i in range(self.n_terms):
+            matrix += self.coefs[i]*self.pauli_strings[i].to_matrix()
 
         return matrix
 

@@ -139,18 +139,14 @@ class OneBodyFermionicHamiltonian(FermionicHamiltonian):
         """        
 
         n_orbs = self.number_of_orbitals()
-        print(f'Num Orbs: {n_orbs}')
         # Since each creation/annihilation operator consist of 2 PauliString for each orbital
         # and we compute ap * am there will be (2*n_orbs)**2 Coefs and PauliStrings
         new_coefs = np.zeros(((2*n_orbs)**2,),dtype = np.complex)
         new_pauli_strings = np.zeros(((2*n_orbs)**2,),dtype = PauliString)
-        print(f"Total number of new ppauli strings: {(2*n_orbs)**2}")
         # TO COMPLETE (after activity 3.1)
         for i in range(len(aps)):
             for j in range(len(ams)):
                 term_ij_lcps = aps[i] * ams[j] * self.integrals[i,j]
-                print(f'number of new terms: {len(term_ij_lcps)}')
-                print(f'placing new_terms at index: {4 * (i * len(ams) + j)}')
                 start_idx = 4 * (i * len(ams) + j)
                 new_coefs[start_idx:start_idx+4] = term_ij_lcps.coefs
                 new_pauli_strings[start_idx:start_idx+4] = term_ij_lcps.pauli_strings
