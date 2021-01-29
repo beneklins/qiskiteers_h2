@@ -39,8 +39,8 @@ class Mapping(object):
         """
 
         aps, ams = self.fermionic_operator_linear_combinaison_pauli_string(fermionic_hamiltonian.number_of_orbitals())
-        pslc = fermionic_hamiltonian.to_pauli_string_linear_combinaison(aps, ams)
-        return pslc
+        lcps = fermionic_hamiltonian.to_linear_combinaison_pauli_string(aps, ams)
+        return lcps
 
 
 class JordanWigner(Mapping):

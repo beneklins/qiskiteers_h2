@@ -100,11 +100,19 @@ class Evaluator(object):
         # (Optional) record the result with the record object
         # (Optional) monitor the time of execution
         ################################################################################################################
-
-        output = self.interpret_counts(counts_arrays)
+        
+        job = execute(eval_circuits, backend=self.backend, **self.execute_opts)
+        result = job.result()
+        
+        # TODO: Apply error mitigation with the measure_filter
+        
+        for i in range(len(eval_circuits)):
+            counts_arrays.append(self.counts2array(result.get_counts(eval_circuits[i])))
+            
+        output = self.interpret_count_arrays(counts_arrays)
+        
+        # TODO: What do we do with this?
         eval_time = time.time()-t0
-
-        raise NotImplementedError()
 
         return output
 
@@ -127,7 +135,10 @@ class Evaluator(object):
         # TO COMPLETE (after activity 3.2)
         ################################################################################################################
 
-        raise NotImplementedError()
+        param_dict = dict(zip(self.varform.parameters, params))
+        parameterized_qc = self.varform.assign_parameters(param_dict)
+        for measurement_circuit in self.measurement_circuits:
+            eval_circuits.append(parameterized_qc.copy() + measurement_circuit)
 
         return eval_circuits
 
@@ -192,7 +203,7 @@ class Evaluator(object):
         # TO COMPLETE (after activity 3.2)
         ################################################################################################################
         
-        raise NotImplementedError()
+        value = interpreter.dot(counts_array) / counts_array.sum()
 
         return value
 
@@ -217,7 +228,15 @@ class Evaluator(object):
         # TO COMPLETE (after activity 3.2)
         ################################################################################################################
         
-        raise NotImplementedError()
+        for i, (x, z) in enumerate(zip(pauli_string.x_bits, pauli_string.z_bits)):
+            if x == 1 and z == 0:
+                qc.h(i)
+            elif x == 1 and z == 1:
+                qc.sdg(i)
+                qc.h(i)
+        for i in range(n_qubits):
+            qc.measure(i, i)
+                
 
         return qc
 
@@ -239,15 +258,27 @@ class Evaluator(object):
         # YOUR CODE HERE
         # TO COMPLETE (after activity 3.2)
         # Hint : starts with
-        eigenvalues = np.ones((1,), dtype=np.int)
-        # and use np.kron to build the vector
+        eigenvalues = np.zeros((2**len(pauli_string),), dtype=np.int)
+        # and use np.kron to build the vector ???
         # Eigenvalues of X, Y and Z are 1 and -1
         # Eigenvalues of I are 1 and 1
         EIG_Z = np.array([1,-1], dtype=np.int)
         EIG_I = np.array([1,1], dtype=np.int)
         ################################################################################################################
         
-        raise NotImplementedError()
+        for i in range(2**len(pauli_string)):
+            s = f'0{len(pauli_string)}b'
+            bitstring = f'{i:{s}}'
+            pauli_eigenvalues = np.zeros(len(pauli_string))
+            for j, xyz in enumerate(pauli_string.x_bits + pauli_string.z_bits):       
+                # measurable pauli Z
+                if xyz:  
+                    pauli_eigenvalues[j] = EIG_Z[int(bitstring[-(j+1)])]
+                # measurable pauli I
+                else:  
+                    pauli_eigenvalues[j] = EIG_I[int(bitstring[-(j+1)])]
+            eigenvalues[i] = np.prod(pauli_eigenvalues)
+        
 
         return eigenvalues
 
@@ -281,7 +312,10 @@ class BasicEvaluator(Evaluator):
         # Hint : the next method does the work for 1 PauliString + coef
         ################################################################################################################
         
-        raise NotImplementedError()
+        for pauli_string, coef in zip(lcps.pauli_strings, lcps.coefs):
+            circuit, interpreter = BasicEvaluator.pauli_string_circuit_and_interpreter(coef, pauli_string)
+            circuits.append(circuit)
+            interpreters.append(interpreter)
 
         return circuits, interpreters
 
