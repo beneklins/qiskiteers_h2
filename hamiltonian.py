@@ -385,15 +385,17 @@ class MolecularFermionicHamiltonian(FermionicHamiltonian):
         # Activity 2.3.
         # Diagonalisation of the overlap matrix S.
         overlap_matrix = mol.intor('int1e_ovlp')
-        # Construct an orthonormal basis
-        overlap_matrix_eigval, overlap_matrix_eigvec = (
-            np.linalg.eigh(overlap_matrix))
+        overlap_matrix_eigval, overlap_matrix_eigvec = np.linalg.eig(
+            overlap_matrix)
         # Reverse the ordering of eigenvalues.
         overlap_matrix_eig_order = np.argsort(overlap_matrix_eigval)
-        overlap_matrix_eigvec = overlap_matrix_eigvec[:, overlap_matrix_eig_order]
+        overlap_matrix_eigval = overlap_matrix_eigval[
+            None, overlap_matrix_eig_order]
+        overlap_matrix_eigvec = overlap_matrix_eigvec[
+            :, overlap_matrix_eig_order]
         # Linear transformation that takes us from the atomic (ao) to the
         # orthonormal (oo) basis.
-        ao2oo = overlap_matrix_eigvec/np.sqrt(overlap_matrix_eigval[None, :])
+        ao2oo = overlap_matrix_eigvec/np.sqrt(overlap_matrix_eigval)
 
         # Build h1 and h2 in atomic orbital (AO) basis.
         h1_ao = mol.intor('int1e_kin') + mol.intor('int1e_nuc')
@@ -408,19 +410,20 @@ class MolecularFermionicHamiltonian(FermionicHamiltonian):
 
         # Linear transformation that takes us from the orthonormal (oo)
         # to the molecular (mo) basis.
-        h1_oo_eigval, h1_oo_eigvec = np.linalg.eig(h1_oo)
+        h1_oo_eigval, h1_oo_eigvec = np.linalg.eigh(h1_oo)
         # Reverse the ordering of eigenvalues.
         # TODO: Check if we indeed need to reverse the ordering here.
         h1_oo_eig_order = np.argsort(h1_oo_eigval)
         oo2mo = h1_oo_eigvec[:, h1_oo_eig_order]
+        ao2mo = ao2oo @ oo2mo
 
         # Transform h1 and h2 into the molecular orbital (MO) basis.
         h1_mo = np.einsum(
             'mi, nj, mn -> ij',
             oo2mo, oo2mo, h1_oo)
         h2_mo = np.einsum(
-            'mi, nj, ok, pl, mnop -> ijkl',
-            oo2mo, oo2mo, oo2mo, oo2mo, h2_ao)
+            'mi, nj, ok, pl, mnop -> iklj',
+            oo2mo, oo2mo, oo2mo, oo2mo, h2_oo)
 
         # Build the one and two body Hamiltonians
         one_body = OneBodyFermionicHamiltonian(h1_mo)
