@@ -79,24 +79,34 @@ class Evaluator(object):
         eval_circuits = self.prepare_eval_circuits(params)
         counts_arrays = list()
 
-        ################################################################################################################
-        # YOUR CODE HERE
-        # TO COMPLETE (after activity 3.2)
-        # A. For each eval_circuits :
-        #   1. Execute the eval_circuits on the backend
-        #   2. Extract the result from the job
-        #   2. (Optional) Apply error mitigation with the measure_filter
-        #   3. Assemble the counts into an array with counts2array()
-        #   4. Compute the exp_value of the PauliString
-        # B. Combine all the results into the output value (e.i. the energy)
-        # (Optional) record the result with the record object
-        # (Optional) monitor the time of execution
-        ################################################################################################################
-
-        output = self.interpret_counts(counts_arrays)
+        # Activity 3.2.
+        # TODO: Apply error mitigation with the measure_filter
+        # TODO: Record the result with the record object
+        # TODO: Monitor the time of execution
+        try:
+            debug_flag = self.execute_opts['debug']
+        except:
+            debug_flag = False
+        number_circuits = len(eval_circuits)
+        for i, circuit in enumerate(eval_circuits):
+            if debug_flag:
+                print(
+                    f"Evaluating circuit {i+1:03}/{number_circuits:03}."
+                    f" Time elapsed: {time.time()-t0}s"
+                )
+            result = execute(
+                circuit,
+                self.backend,
+                # shots=1024,
+                **self.execute_opts,
+            ).result()
+            counts = result.get_counts(circuit)
+            counts_array = self.counts2array(counts)
+            counts_arrays.append(counts_array)
+        output = self.interpret_count_arrays(counts_arrays)
         eval_time = time.time()-t0
-
-        raise NotImplementedError()
+        if debug_flag:
+            print(f"Total evaluation time: {eval_time}s ({eval_time/60}min)")
 
         return output
 
@@ -112,14 +122,15 @@ class Evaluator(object):
             list<QuantumCircuit>: All the QuantumCircuit necessary to the evaluation of the LCPS.
         """
 
-        eval_circuits = list()
-
-        ################################################################################################################
-        # YOUR CODE HERE
-        # TO COMPLETE (after activity 3.2)
-        ################################################################################################################
-
-        raise NotImplementedError()
+        # Activity 3.2.
+        # Assign the parameters to their variational form.
+        var_dict = {
+            key: value
+            for key, value in zip(self.varform.parameters, params)}
+        # Combine the resulting circuit to all measurement circuits.
+        eval_circuits = [
+            self.varform.assign_parameters(var_dict) + circuit
+            for circuit in self.measurement_circuits]
 
         return eval_circuits
 
@@ -135,6 +146,7 @@ class Evaluator(object):
             0...00, 0...01, 0...10, ..., 1...11
         """
 
+        # TODO: Optimise this routine using dictionaries.
         array = np.zeros((2**self.n_qubits,), dtype=int)
         for state, count in counts.items():
             i = int(state,base=2)
@@ -157,7 +169,7 @@ class Evaluator(object):
         cumulative = 0
         for interpreter, counts_array in zip(self.interpreters, counts_arrays):
             cumulative += self.interpret_count_array(interpreter,counts_array)
-            
+
         return np.real(cumulative)
 
     @staticmethod
@@ -177,14 +189,11 @@ class Evaluator(object):
                 Mathematical return h_i <P_i> 
         """
 
-        value = None
-
-        ################################################################################################################
-        # YOUR CODE HERE
-        # TO COMPLETE (after activity 3.2)
-        ################################################################################################################
-        
-        raise NotImplementedError()
+        # Activity 3.2.
+        # This method computes <P> = (1/Σ_p N_p) * (Σ_q N_q*Λ_q), where
+        # Λ ≡ interpreter and N_q ≡ counts_array.
+        n_tot = np.sum(counts_array)
+        value = np.dot(interpreter, counts_array)/n_tot
 
         return value
 
@@ -203,13 +212,23 @@ class Evaluator(object):
 
         n_qubits = len(pauli_string)
         qc = QuantumCircuit(n_qubits, n_qubits)
-        
-        ################################################################################################################
-        # YOUR CODE HERE
-        # TO COMPLETE (after activity 3.2)
-        ################################################################################################################
-        
-        raise NotImplementedError()
+
+        # Activity 3.2.
+        xz_list = zip(pauli_string.x_bits, pauli_string.z_bits)
+        for i, xz in enumerate(xz_list):
+            x, z = xz
+            # To measure on the X basis, apply H.
+            if (x, z) == (1, 0):
+                qc.h(i)
+            # To measure on the Y basis, apply S+ and H.
+            elif (x, z) == (1, 1):
+                qc.sdg(i)
+                qc.h(i)
+            else:
+                pass
+        # Measure everything.
+        for i in range(n_qubits):
+            qc.measure(i, i)
 
         return qc
 
@@ -225,21 +244,24 @@ class Evaluator(object):
             [type]: [description]
         """
 
-        eigenvalues = None
+        # Activity 3.2: Brett.
+        # TODO: Use np.kron.
+        EIG_Z = np.array([+1, -1], dtype=np.int)
+        EIG_I = np.array([+1, +1], dtype=np.int)
+        eigenvalues = np.zeros((2**len(pauli_string),), dtype=np.int)
 
-        ################################################################################################################
-        # YOUR CODE HERE
-        # TO COMPLETE (after activity 3.2)
-        # Hint : starts with
-        eigenvalues = np.ones((1,), dtype=np.int)
-        # and use np.kron to build the vector
-        # Eigenvalues of X, Y and Z are 1 and -1
-        # Eigenvalues of I are 1 and 1
-        EIG_Z = np.array([1,-1], dtype=np.int)
-        EIG_I = np.array([1,1], dtype=np.int)
-        ################################################################################################################
-        
-        raise NotImplementedError()
+        for i in range(2**len(pauli_string)):
+            s = f'0{len(pauli_string)}b'
+            bitstring = f'{i:{s}}'
+            pauli_eigenvalues = np.zeros(len(pauli_string))
+            for j, xyz in enumerate(pauli_string.x_bits + pauli_string.z_bits):
+                # measurable pauli Z
+                if xyz:
+                    pauli_eigenvalues[j] = EIG_Z[int(bitstring[-(j+1)])]
+                # measurable pauli I
+                else:
+                    pauli_eigenvalues[j] = EIG_I[int(bitstring[-(j+1)])]
+            eigenvalues[i] = np.prod(pauli_eigenvalues)
 
         return eigenvalues
 
@@ -263,17 +285,18 @@ class BasicEvaluator(Evaluator):
         Returns:
             list<qiskit.QuantumCircuit>, list<np.array>: [description]
         """
-        
+
         circuits = list()
         interpreters = list()
 
-        ################################################################################################################
-        # YOUR CODE HERE
-        # TO COMPLETE (after activity 3.2)
-        # Hint : the next method does the work for 1 PauliString + coef
-        ################################################################################################################
-        
-        raise NotImplementedError()
+        # Activity 3.2.
+        str_coef = zip(lcps.pauli_strings, lcps.coefs)
+        for string, coef in str_coef:
+            result = BasicEvaluator.pauli_string_circuit_and_interpreter(
+                coef, string)
+            circuit, interpreter = result
+            circuits.append(circuit)
+            interpreters.append(interpreter)
 
         return circuits, interpreters
 

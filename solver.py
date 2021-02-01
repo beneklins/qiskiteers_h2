@@ -38,15 +38,13 @@ class ExactSolver(LCPSSolver):
             np.array, np.array : Eigenvalues and eigenvectors sorted with respect to the eigenvalues.
         """
 
-        eig_values, eig_vectors = None
-
-        ################################################################################################################
-        # YOUR CODE HERE (OPTIONAL)
-        # TO COMPLETE (after activity 3.2)
-        # Hint : np.linalg.eigh
-        ################################################################################################################
-
-        raise NotImplementedError()
+        # Activity 3.2 (optional).
+        hamiltonian_matrix_repr = lcps.to_matrix()
+        # Order the eigenvalues in ascending order.
+        eigenvalues, eigenvectors = np.linalg.eigh(hamiltonian_matrix_repr)
+        eigenorder = np.argsort(eigenvalues)
+        eig_values = eigenvalues[eigenorder]
+        eig_vectors = eigenvectors[:, eigenorder]
 
         return eig_values, eig_vectors
 
@@ -61,14 +59,14 @@ class ExactSolver(LCPSSolver):
             float, np.array : The lowest eigenvalue and the associated eigenvector.
         """
 
-        eig_value, eig_vector = None
-
-        ################################################################################################################
-        # YOUR CODE HERE (OPTIONAL)
-        # TO COMPLETE (after activity 3.2)
-        ################################################################################################################
-
-        raise NotImplementedError()
+        # Activity 3.2 (optional).
+        eigenvalues, eigenvectors = self.eig(lcps)
+        # # Order the eigenvalues in ascending order.
+        # eigenorder = np.argsort(eigenvalues)
+        # eigenvalues = eigenvalues[eigenorder]
+        # eigenvectors = eigenvectors[:, eigenorder]
+        eig_value = eigenvalues[0]
+        eig_vector = eigenvectors[:, 0]
 
         return eig_value, eig_vector
 
@@ -113,16 +111,11 @@ class VQESolver(LCPSSolver):
 
         t0 = time.time()
 
-        opt_value, opt_params = None
-
-        ################################################################################################################
-        # YOUR CODE HERE (OPTIONAL)
-        # TO COMPLETE (after activity 3.2)
-        ################################################################################################################
-
-        raise NotImplementedError()
-
+        # Activity 3.2: Brett.
+        self.evaluator.set_linear_combinaison_pauli_string(lcps)
+        result = self.minimizer(self.evaluator.eval, self.start_params)
+        opt_value, opt_params = result.fun, result.x
         self.last_minimization_duration = time.time()-t0
-        
+
         return opt_value, opt_params
 
