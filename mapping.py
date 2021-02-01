@@ -19,19 +19,19 @@ class Mapping(object):
     def fermionic_hamiltonian_to_linear_combinaison_pauli_string(self, fermionic_hamiltonian):
         """
         Do the mapping of a FermionicHamiltonian. First generates the LCPS representation of the creation/annihilation
-        operators for the specific mapping. Uses the 'to_pauli_string_linear_combinaison' of the FermionicHamiltonian
+        operators for the specific mapping. Uses the 'to_linear_combinaison_pauli_string' of the FermionicHamiltonian
         to generate the complete LCPS.
 
         Args:
             fermionic_hamiltonian (FermionicHamiltonian): A FermionicHamiltonian that provided a 
-                'to_pauli_string_linear_combinaison' method.
+                'to_linear_combinaison_pauli_string' method.
 
         Returns:
             LinearCombinaisonPauliString: The LCPS reprenseting the FermionicHamiltonian
         """
 
         aps, ams = self.fermionic_operator_linear_combinaison_pauli_string(fermionic_hamiltonian.number_of_orbitals())
-        pslc = fermionic_hamiltonian.to_pauli_string_linear_combinaison(aps, ams)
+        pslc = fermionic_hamiltonian.to_linear_combinaison_pauli_string(aps, ams)
         return pslc
 
 
