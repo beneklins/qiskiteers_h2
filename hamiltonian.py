@@ -187,18 +187,23 @@ class OneBodyFermionicHamiltonian(FermionicHamiltonian):
         new_coefs = np.zeros(((2*n_orbs)**2,), dtype=np.complex)
         new_pauli_strings = np.zeros(((2*n_orbs)**2,), dtype=PauliString)
 
-        lcps = None
-
-        #################################################################
-        # YOUR CODE HERE
-        # TO COMPLETE (after activity 3.1)
-        # lcps =
-        #################################################################
-
-        raise NotImplementedError()
+        # Activity 3.1.
+        i = 0
+        for j in range(n_orbs):
+            for k in range(n_orbs):
+                m = 4*i
+                n = m + 4
+                coefficient = self.integrals[j, k]
+                operator = aps[j] * ams[k]
+                lcps_term = operator * coefficient
+                new_coefs[m:n] = lcps_term.coefs
+                new_pauli_strings[m:n] = lcps_term.pauli_strings
+                i += 1
+        lcps = LinearCombinaisonPauliString(new_coefs, new_pauli_strings)
+        # Automatically reduce the number of Pauli strings.
+        lcps = lcps.apply_threshold().combine().apply_threshold().sort()
 
         return lcps
-
 
 class TwoBodyFermionicHamiltonian(FermionicHamiltonian):
     spin_tensor = np.kron(np.eye(2)[:, None, None, :], np.eye(2)[None, :, :, None])  # physicist notation
@@ -280,15 +285,24 @@ class TwoBodyFermionicHamiltonian(FermionicHamiltonian):
         new_coefs = np.zeros(((2*n_orbs)**4,), dtype=np.complex)
         new_pauli_strings = np.zeros(((2*n_orbs)**4,), dtype=PauliString)
 
-        lcps = None
-
-        #################################################################
-        # YOUR CODE HERE
-        # TO COMPLETE (after activity 3.1)
-        # lcps =
-        #################################################################
-
-        raise NotImplementedError()
+        # Activity 3.1.
+        c = 0
+        for i in range(n_orbs):
+            for j in range(n_orbs):
+                for k in range(n_orbs):
+                    for l in range(n_orbs):
+                        m = 16*c
+                        n = m + 16
+                        operator = aps[i] * aps[j] * ams[k] * ams[l]
+                        coefficient = self.integrals[i, j, k, l]
+                        lcps_term = operator * coefficient
+                        new_coefs[m:n] = lcps_term.coefs
+                        new_pauli_strings[m:n] = lcps_term.pauli_strings
+                        c += 1
+        # From the definition.
+        lcps = (1/2) * LinearCombinaisonPauliString(new_coefs, new_pauli_strings)
+        # Automatically reduce the number of Pauli strings.
+        # lcps = lcps.apply_threshold().combine().apply_threshold().sort()
 
         return lcps
 
@@ -342,10 +356,13 @@ class MolecularFermionicHamiltonian(FermionicHamiltonian):
             and one TwoBody terms.
         """
 
-        one_body = OneBodyFermionicHamiltonian(h1, with_spin)
-        two_body = TwoBodyFermionicHamiltonian(h2, with_spin)
+        # one_body = OneBodyFermionicHamiltonian(h1, with_spin)
+        # two_body = TwoBodyFermionicHamiltonian(h2, with_spin)
+        one_body = OneBodyFermionicHamiltonian(h1)
+        two_body = TwoBodyFermionicHamiltonian(h2)
 
-        return cls(one_body, two_body, with_spin)
+        # return cls(one_body, two_body, with_spin)
+        return cls(one_body, two_body)
 
     @classmethod
     def from_pyscf_mol(cls, mol):
@@ -525,13 +542,11 @@ class MolecularFermionicHamiltonian(FermionicHamiltonian):
             Qubit operator representation of the MolecularFermionicHamiltonian.
         """
 
-        out = None
-
-        #################################################################
-        # YOUR CODE HERE
-        # TO COMPLETE (after activity 3.1)
-        #################################################################
-
-        raise NotImplementedError()
+        # Activity 3.1.
+        lcps_1 = self.one_body.to_linear_combinaison_pauli_string(aps, ams)
+        lcps_2 = self.two_body.to_linear_combinaison_pauli_string(aps, ams)
+        lcps = lcps_1 + lcps_2
+        # Automatically reduce the number of Pauli strings.
+        out = lcps.apply_threshold().combine().apply_threshold().sort()
 
         return out

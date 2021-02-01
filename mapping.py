@@ -58,14 +58,36 @@ class JordanWigner(Mapping):
 
         aps = list()
         ams = list()
-        
-        ################################################################################################################
-        # YOUR CODE HERE
-        # TO COMPLETE (after activity 3.1)
-        # This is a large piece of the puzzle
-        ################################################################################################################
 
-        raise NotImplementedError()
+        # Activity 3.1.
+        # The creation and annihilation operators are given by two
+        # Pauli strings:
+        # a_i  = 1/2 (real(P_i)) + i imag(P_i))
+        # a_i+ = 1/2 (real(P_i)) - i imag(P_i))
+        for i in range(n_qubits):
+
+            coefficients_crea = (0.5, -0.5j)
+            coefficients_anih = (0.5, +0.5j)
+            real_p_x = np.zeros(n_qubits, dtype=bool)
+            imag_p_x = np.zeros(n_qubits, dtype=bool)
+            real_p_z = np.zeros(n_qubits, dtype=bool)
+            imag_p_z = np.zeros(n_qubits, dtype=bool)
+
+            # From the slides.
+            real_p_z[:i] = 1
+            real_p_x[i] = 1
+            imag_p_z[:i+1] = 1
+            imag_p_x[i] = 1
+
+            # In the ZX representation.
+            real_string = PauliString(real_p_z, real_p_x)
+            imag_string = PauliString(imag_p_z, imag_p_x)
+            strings = (real_string, imag_string)
+
+            aps.append(LinearCombinaisonPauliString(
+                coefficients_crea, strings))
+            ams.append(LinearCombinaisonPauliString(
+                coefficients_anih, strings))
 
         return aps, ams
 
