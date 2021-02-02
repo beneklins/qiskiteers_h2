@@ -103,11 +103,11 @@ class Evaluator(object):
         
         job = execute(eval_circuits, backend=self.backend, **self.execute_opts)
         result = job.result()
-        
-        # TODO: Apply error mitigation with the measure_filter
-        
         for i in range(len(eval_circuits)):
-            counts_arrays.append(self.counts2array(result.get_counts(eval_circuits[i])))
+            counts = result.get_counts(eval_circuits[i])
+            if self.measure_filter is not None:
+                counts = self.measure_filter.apply(counts)
+            counts_arrays.append(self.counts2array(counts))
             
         output = self.interpret_count_arrays(counts_arrays)
         
