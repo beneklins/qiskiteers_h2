@@ -17,28 +17,35 @@ class PauliString(object):
 
     def __init__(self, z_bits, x_bits):
         """
-        Describe a Pauli string as 2 arrays of booleans.
-        The PauliString represents (-1j)**(z_bits*x_bits) Z**z_bits X**x_bits.
+        Describe a Pauli string as 2 arrays of booleans. The `PauliString` represents `(-1j)**(z_bits*x_bits) Z**z_bits X**x_bits`.
 
-        Args:
-            z_bits (np.ndarray<bool>): True where a Z Pauli is applied.
-            x_bits (np.ndarray<bool>): True where a X Pauli is applied.
+        Parameters
+        ----------
+        z_bits : np.ndarray<bool>
+        	True where a Z Pauli is applied.
+        x_bits : np.ndarray<bool>
+        	True where a X Pauli is applied.
 
-        Raises:
-            ValueError: [description]
+        Raises
+        ------
+        ValueError
+        	If the number of `z_bits` and `x_bits` are different.
         """
 
         if len(z_bits) != len(x_bits):
-            raise ValueError('z_bits and x_bits must have the same number of elements')
+            raise ValueError(
+            	'z_bits and x_bits must have the same number of elements')
         self.z_bits = z_bits
         self.x_bits = x_bits
 
     def __str__(self):
         """
-        String representation of the PauliString.
+        String representation of the `PauliString`.
 
-        Returns:
-            str: String of I, Z, X and Y.
+        Returns
+        -------
+        str
+        	String of I, Z, X and Y.
         """
 
         pauli_labels = 'IZXY'
@@ -50,20 +57,23 @@ class PauliString(object):
 
     def __len__(self):
         """
-        Number of Pauli in the PauliString.
-        Also the number of qubits.
+        Number of Pauli in the `PauliString`. It is also the number of qubits.
 
-        Returns:
-            int: Length of the PauliString, also number of qubits.
+        Returns
+        -------
+        int
+        	Length of the `PauliString`, also number of qubits.
         """
 
         return len(self.z_bits)
 
     def __mul__(self, other):
         """
-        Allow the use of '*' with other PauliString or with a coef (numeric).
+        Allow the use of `*` with other `PauliString` or with a numeric
+        coefficient.
 
-        Args:
+        Parameters
+        ----------
             other (PauliString): Will compute the product 
             or
             other (float): [description]
