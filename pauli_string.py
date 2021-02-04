@@ -17,28 +17,35 @@ class PauliString(object):
 
     def __init__(self, z_bits, x_bits):
         """
-        Describe a Pauli string as 2 arrays of booleans.
-        The PauliString represents (-1j)**(z_bits*x_bits) Z**z_bits X**x_bits.
+        Describe a Pauli string as 2 arrays of booleans. The `PauliString` represents `(-1j)**(z_bits*x_bits) Z**z_bits X**x_bits`.
 
-        Args:
-            z_bits (np.ndarray<bool>): True where a Z Pauli is applied.
-            x_bits (np.ndarray<bool>): True where a X Pauli is applied.
+        Parameters
+        ----------
+        z_bits : np.ndarray<bool>
+            True where a Z Pauli is applied.
+        x_bits : np.ndarray<bool>
+            True where a X Pauli is applied.
 
-        Raises:
-            ValueError: [description]
+        Raises
+        ------
+        ValueError
+            If the number of `z_bits` and `x_bits` are different.
         """
 
         if len(z_bits) != len(x_bits):
             raise ValueError('z_bits and x_bits must have the same number of elements')
+
         self.z_bits = z_bits
         self.x_bits = x_bits
 
     def __str__(self):
         """
-        String representation of the PauliString.
+        String representation of the `PauliString`.
 
-        Returns:
-            str: String of I, Z, X and Y.
+        Returns
+        -------
+        str
+            String of I, Z, X and Y.
         """
 
         pauli_labels = 'IZXY'
@@ -50,47 +57,56 @@ class PauliString(object):
 
     def __len__(self):
         """
-        Number of Pauli in the PauliString.
-        Also the number of qubits.
+        Number of Pauli in the `PauliString`. It is also the number of qubits.
 
-        Returns:
-            int: Length of the PauliString, also number of qubits.
+        Returns
+        -------
+        int
+            Length of the `PauliString`, also number of qubits.
         """
 
         return len(self.z_bits)
 
     def __mul__(self, other):
         """
-        Allow the use of '*' with other PauliString or with a coef (numeric).
+        Allow the use of `*` with other `PauliString` or with a numeric
+        coefficient.
 
-        Args:
-            other (PauliString): Will compute the product 
-            or
-            other (float): [description]
+        Parameters
+        ----------
+        other : PauliString/float
+            Will compute the product of Pauli strings if `PauliString` or
+            computer a linear combination of Pauli strings if `float`.
 
-        Returns:
-            PauliString, complex: When other is a PauliString
-            or
-            LinearCombinaisonPauliString : When other is numeric
+        Returns
+        -------
+        PauliString/LinearCombinaisonPauliString
+            `PauliString` when other is a PauliString or
+            `LinearCombinaisonPauliString` when other is numeric
         """
-        if isinstance(other,PauliString):
+
+        if isinstance(other, PauliString):
             return self.mul_pauli_string(other)
         else:
             return self.mul_coef(other)
 
     def __rmul__(self, other):
         """
-        Same as __mul__. Allow the use of '*' with a preceding coef (numeric) Like in 0.5 * PauliString
+        Same as `__mul__`. Allow the use of `*` with a preceding numeric
+        coefficient. Example: `1/2 * PauliString`.
 
-        Args:
-            other (PauliString): Will compute the product 
-            or
-            other (float): [description]
 
-        Returns:
-            PauliString, complex: When other is a PauliString
-            or
-            LinearCombinaisonPauliString : When other is numeric
+        Parameters
+        ----------
+        other : PauliString/float
+            Will compute the product of Pauli strings if `PauliString` or
+            computer a linear combination of Pauli strings if `float`.
+
+        Returns
+        -------
+        PauliString/LinearCombinaisonPauliString
+            `PauliString` when other is a PauliString or
+            `LinearCombinaisonPauliString` when other is numeric
         """
 
         return self.__mul__(other)
@@ -98,44 +114,47 @@ class PauliString(object):
     @classmethod
     def from_zx_bits(cls, zx_bits):
         """
-        Construct a PauliString from a single array<bool> of len 2n.
+        Construct a `PauliString` from a single `array<bool>` of length `2n`.
 
-        Args:
-            zx_bits (np.array<bool>): An array of bools. First n bits specify the Zs. Second half specify the Xs.
+        Parameters
+        ----------
+        zx_bits : np.array<bool>
+            An array of booleans. First `n` bits specify the :math:`Z`s.
+            Second half specify the :math:`X`s.
 
-        Returns:
-            PauliString: The Pauli string specified by the 'zx_bits'.
+        Returns
+        -------
+        PauliString
+            The Pauli string specified by `zx_bits`.
         """
 
         z_bits = x_bits = None
 
-        ################################################################################################################
-        # YOUR CODE HERE
-        # TO COMPLETE (after activity 3.1)
+        # Activity 3.1.
         z_bits = zx_bits[:len(zx_bits)//2]
         x_bits = zx_bits[len(zx_bits)//2:]
-        ################################################################################################################
-        
+
         return cls(z_bits, x_bits)
 
     @classmethod
     def from_str(cls, pauli_str):
         """
-        Construct a PauliString from a str (as returned by __str__).
+        Construct a PauliString from a string (as returned by `__str__`).
 
-        Args:
-            pauli_str (str): String of length n made of 'I', 'X', 'Y' and 'Z'.
+        Parameters
+        ----------
+        pauli_str : str
+            String of length `n` made of :math:`I`, :math:`X`, :math:`Y` and
+            :math:`Z`.
 
-        Returns:
-            PauliString: The Pauli string specified by the 'pauli_str'.
+        Returns
+        -------
+        PauliString
+            The Pauli string specified by `pauli_str`.
         """
 
+        # Activity 3.1.
         z_bits, x_bits = [], []
-
-        ################################################################################################################
-        # YOUR CODE HERE
-        # TO COMPLETE (after activity 3.1)
-        ################################################################################################################
         for pauli in pauli_str[::-1]:
             if pauli.upper() == 'X':
                 z_bits.append(False)
@@ -150,143 +169,182 @@ class PauliString(object):
                 z_bits.append(False)
                 x_bits.append(False)
             else:
-                raise ValueError('Pauli string must only have characters X, Y, Z, and I')
-        
+                raise ValueError('Pauli string must only have characters X, Y, Z and I')
+
         z_bits = np.array(z_bits, dtype=bool)
         x_bits = np.array(x_bits, dtype=bool)
-        
+
         return cls(z_bits, x_bits)
 
     def to_zx_bits(self):
         """
-        Return the zx_bits representation of the PauliString.
-        Useful to compare PauliString together.
+        Return the `zx_bits` representation of the `PauliString`. Useful to
+        compare `PauliString`s together.
 
-        Returns:
-            np.array<bool>: zx_bits representation of the PauliString of length 2n
+        Returns
+        -------
+        np.array<bool>
+            `zx_bits` representation of the `PauliString` of length `2n`.
         """
 
-        zx_bits = None
-
-        ################################################################################################################
-        # YOUR CODE HERE
-        # TO COMPLETE (after activity 3.1)
-        ################################################################################################################
-        
+        # Activity 3.1.
         zx_bits = np.concatenate((self.z_bits, self.x_bits))
 
         return zx_bits
 
     def to_xz_bits(self):
         """
-        Return the xz_bits representation of the PauliString.
-        Useful to check commutativity.
+        Return the `xz_bits` representation of the `PauliString`. Useful to
+        check commutativity.
 
-        Returns:
-            np.array<bool>: xz_bits representation of the PauliString of length 2n
+        Returns
+        -------
+        np.array<bool>
+            `xz_bits` representation of the `PauliString` of length `2n`.
         """
 
-        ################################################################################################################
-        # YOUR CODE HERE
-        # TO COMPLETE (after activity 3.1)
-        ################################################################################################################
-        
+        # Activity 3.1.
         xz_bits = np.concatenate((self.x_bits, self.z_bits))
 
         return xz_bits
 
     def mul_pauli_string(self, other):
         """
-        Product with an 'other' PauliString.
+        Product with an `other` Pauli string.
 
-        Args:
-            other (PauliString): An other PauliString.
+        Parameters
+        ----------
+        other : PauliString
+            An other PauliString.
 
-        Raises:
-            ValueError: If the other PauliString is not of the same length.
+        Raises
+        ------
+        ValueError: If the other `PauliString` is not of the same length.
 
-        Returns:
-            PauliString, complex: The resulting PauliString and the product phase.
+        Returns
+        -------
+        PauliString : complex
+            The resulting `PauliString` and the product phase.
         """
-        
+
         if len(self) != len(other):
             raise ValueError('PauliString must be of the same length')
 
+        # Activity 3.1 using prime numbers!
+        # pauli_str = self.__str__()
+        # pauli_str_len = len(pauli_str)
+        # other_str = other.__str__()
+        # pauli_str_array = np.array(list(pauli_str), dtype='U1')
+        # other_str_array = np.array(list(other_str), dtype='U1')
+        # #
+        # dict_spin_matrices = dict(I=1, X=2, Y=3, Z=5)
+        # pauli_array = np.array([dict_spin_matrices[i] for i in pauli_str_array])
+        # other_array = np.array([dict_spin_matrices[i] for i in other_str_array])
+        # #
+        # dict_spin_matrices_prod = dict({
+        #     1: 'I', 2: 'X', 3: 'Y', 5: 'Z', 6: 'iZ', 15: 'iX', 10: 'iiiY',
+        #     4: 'I', 9: 'I', 25: 'I',
+        # })
+        # extra_phase_array = np.empty(pauli_str_len, dtype='U2')
+        # for idx in range(pauli_str_len):
+        #     # We are acting on the left.
+        #     left_operator, right_operator = other_array[idx], pauli_array[idx]
+        #     extra_phase = ''
+        #     # Do not add an extra phase if the identity is present.
+        #     if 1 not in (left_operator, right_operator):
+        #         if left_operator > right_operator:
+        #             extra_phase = 'ii' # = -1
+        #     extra_phase_array[idx] = extra_phase
+        # # We are acting on the left.
+        # result = other_array * pauli_array
+        # result_str = ''.join([dict_spin_matrices_prod[i] for i in result])
+        # result_str = result_str + ''.join(extra_phase_array)
+        # winding_number = 0
+        # resulting_pauli_str = ''
+        # for i in result_str:
+        #     if i == 'i':
+        #         winding_number += 1
+        #     else:
+        #         resulting_pauli_str += i
+        # phase = (-1j)**winding_number
+
+        # new_pauli_array = np.array(list(resulting_pauli_str), dtype='U1')
+        # new_y_bits = (new_pauli_array == 'Y')
+        # new_x_bits = (new_pauli_array == 'X') + new_y_bits
+        # new_z_bits = (new_pauli_array == 'Z') + new_y_bits
+
         new_z_bits = new_x_bits = phase = None
 
-        ################################################################################################################
-        # YOUR CODE HERE
-        # TO COMPLETE (after activity 3.1)
-        # xor will do mod 2 addition to the bitstring
+        # Activity 3.1.
+        # xor will do mod 2 addition to the bitstring.
         new_z_bits = np.logical_xor(self.z_bits, other.z_bits)
         new_x_bits = np.logical_xor(self.x_bits, other.x_bits)
         # 2z2 · x1 + z1 · x1 + z2 · x2 - z3 · x3
-        w = (2 * np.sum(np.logical_and(other.z_bits, self.x_bits)) 
-             + np.sum(np.logical_and(self.z_bits, self.x_bits)) 
-             + np.sum(np.logical_and(other.z_bits, other.x_bits)) 
-             - np.sum(np.logical_and(new_z_bits, new_x_bits))) % 4 
+        w = (2 * np.sum(np.logical_and(other.z_bits, self.x_bits))
+             + np.sum(np.logical_and(self.z_bits, self.x_bits))
+             + np.sum(np.logical_and(other.z_bits, other.x_bits))
+             - np.sum(np.logical_and(new_z_bits, new_x_bits))) % 4
         phase = (-1j)**w
-        ################################################################################################################
-        
+
         return self.__class__(new_z_bits, new_x_bits), phase
 
     def mul_coef(self, coef):
         """
-        Build a LCPS from a PauliString (self) and a numeric (coef).
+        Build a LCPS from a `PauliString` (`self`) and a number (`coef`).
 
-        Args:
-            coef (int, float or complex): A numeric coefficient.
+        Parameters
+        ----------
+        coef : int/float/complex
+            A numeric coefficient.
 
-        Returns:
-            LinearCombinaisonPauliString: A LCPS with only one PauliString and coef.
+        Returns
+        -------
+        LinearCombinaisonPauliString
+            A LCPS with only one `PauliString` and coefficient.
         """
 
-        coefs = pauli_strings = None
-
-        ################################################################################################################
-        # YOUR CODE HERE
-        # TO COMPLETE (after activity 3.1)
+        # Activity 3.1.
         coefs = np.array([coef], dtype=complex)
         pauli_strings = np.array([self], dtype=PauliString)
-        ################################################################################################################
 
         return LinearCombinaisonPauliString(coefs, pauli_strings)
 
     def ids(self):
         """
-        Position of Identity in the PauliString.
+        Position of identity in the `PauliString`.
 
-        Returns:
-            np.array<bool>: True where both z_bits and x_bits are False.
+        Returns
+        -------
+        np.array<bool>
+            True where both `z_bits` and `x_bits` are `False`.
         """
 
-        ids = None
-
-        ################################################################################################################
-        # YOUR CODE HERE
-        # TO COMPLETE (after activity 3.1)
-        ################################################################################################################
-
+        # Activity 3.1.
         ids = (self.x_bits | self.z_bits) == False
 
         return ids
 
     def copy(self):
         """
-        Build a copy of the PauliString.
+        Build a copy of the `PauliString`.
 
-        Returns:
-            PauliString: A copy.
+        Returns
+        -------
+        PauliString
+            A copy.
         """
 
         return PauliString(self.z_bits.copy(), self.x_bits.copy())
 
     def to_matrix(self):
         """
-        Build the matrix representation of the PauliString using the Kroenecker product.
+        Build the matrix representation of the `PauliString` using the
+        Kronecker product.
 
-        Returns:
-            np.array<complex>: A 2**n side square matrix.
+        Returns
+        -------
+        np.array<complex>
+            A :math:`2^n` side square matrix.
         """
 
         I_MAT = np.array([[1, 0],[0, 1]])
@@ -294,37 +352,35 @@ class PauliString(object):
         Y_MAT = np.array([[0, -1j],[1j, 0]])
         Z_MAT = np.array([[1, 0],[0, -1]])
 
-        matrix = None
-
-        ################################################################################################################
-        # YOUR CODE HERE (OPTIONAL)
-        # TO COMPLETE (after activity 3.1)
-        # Hints : start with
-        # matrix = np.ones((1,1),dtype = np.complex)
-        # And then use the np.kron() method to build the matrix
-        ################################################################################################################
-
+        # Activity 3.1 (optional).
         paulis = [I_MAT, Z_MAT, X_MAT, Y_MAT]
         matrix = np.ones((1,1),dtype = np.complex)
-        
-        for pauli in reversed((self.z_bits + 2*self.x_bits).astype(int)):   
+
+        for pauli in reversed((self.z_bits + 2*self.x_bits).astype(int)):
             matrix = np.kron(matrix, paulis[pauli])
-        
+
         return matrix
 
 
 class LinearCombinaisonPauliString(object):
     def __init__(self,coefs,pauli_strings):
         """
-        Describes a Linear Combinaison of Pauli Strings.
+        Describes a linear combination of Pauli Strings.
 
-        Args:
-            coefs (np.array): Coefficients multiplying the respective PauliStrings.
-            pauli_strings (np.array<PauliString>): PauliStrings.
+        Parameters
+        ----------
+        coefs : np.array
+            Coefficients multiplying the respective `PauliStrings`.
+        pauli_strings : np.array<PauliString>
+            PauliStrings.
 
-        Raises:
-            ValueError: If the number of coefs is different from the number of PauliStrings.
-            ValueError: If all PauliStrings are not of the same length.
+        Raises
+        ------
+        ValueError
+            If the number of coefficients is different from the number of
+            `PauliStrings`.
+        ValueError
+            If all `PauliStrings` are not of the same length.
         """
 
         if len(coefs) != len(pauli_strings):
@@ -340,13 +396,15 @@ class LinearCombinaisonPauliString(object):
 
         self.coefs = np.array(coefs, dtype=complex)
         self.pauli_strings = np.array(pauli_strings, dtype=PauliString)
-        
+
     def __str__(self):
         """
-        String representation of the LinearCombinaisonPauliString.
+        String representation of the `LinearCombinaisonPauliString`.
 
-        Returns:
-            str: Descriptive string.
+        Returns
+        -------
+        str
+            Descriptive string.
         """
 
         out = f'{self.n_terms:d} pauli strings for {self.n_qubits:d} qubits (Real, Imaginary)'
@@ -356,15 +414,19 @@ class LinearCombinaisonPauliString(object):
 
     def __getitem__(self, key):
         """
-        Return a subset of the LinearCombinaisonPauliString array-like.
+        Return a subset of the `LinearCombinaisonPauliString` array-like.
 
-        Args:
-            key (int or slice): Elements to be returned.
+        Parameters
+        ----------
+        key : int or slice
+            Elements to be returned.
 
-        Returns:
-            LinearCombinaisonPauliString: LCPS with the element specified in key.
+        Returns
+        -------
+        LinearCombinaisonPauliString
+            LCPS with the element specified in key.
         """
-        
+
         if isinstance(key,slice):
             new_coefs = np.array(self.coefs[key])
             new_pauli_strings = self.pauli_strings[key]
@@ -378,40 +440,49 @@ class LinearCombinaisonPauliString(object):
 
     def __len__(self):
         """
-        Number of PauliStrings in the LCPS.
+        Number of `PauliStrings` in the LCPS.
 
-        Returns:
-            int: Number of PauliStrings/coefs.
+        Returns
+        -------
+        int
+            Number of `PauliStrings`/coefficients.
         """
 
         return len(self.pauli_strings)
 
     def __add__(self,other):
         """
-        Allow the use of + to add two LCPS together.
+        Allow the use of `+` to add two LCPS together.
 
-        Args:
-            other (LinearCombinaisonPauliString): An other LCPS.
+        Parameters
+        ----------
+        other : LinearCombinaisonPauliString
+            An other LCPS.
 
-        Returns:
-            LinearCombinaisonPauliString: New LCPS of len = len(self) + len(other).
+        Returns
+        -------
+        LinearCombinaisonPauliString
+            New LCPS of length `len(self) + len(other)`.
         """
 
         return self.add_pauli_string_linear_combinaison(other)
 
     def __mul__(self, other):
         """
-        Allow the use of * with other LCPS or numeric value(s)
+        Allow the use of `*` with other LCPS or numeric values.
 
-        Args:
-            other (LinearCombinaisonPauliString): An other LCPS
+        Parameters
+        ----------
+        other : LinearCombinaisonPauliString
+            An other LCPS
 
-        Returns:
-            LinearCombinaisonPauliString: New LCPS of len = len(self) * len(other)
-            or
-            LinearCombinaisonPauliString: New LCPS of same length with modified coefs
+        Returns
+        -------
+        LinearCombinaisonPauliString/LinearCombinaisonPauliString
+            New LCPS of length `len(self) * len(other)` or a new LCPS of
+            same length with modified coefficients.
         """
-        
+
         if isinstance(other,LinearCombinaisonPauliString):
             return self.mul_linear_combinaison_pauli_string(other)
         else:
@@ -419,34 +490,44 @@ class LinearCombinaisonPauliString(object):
 
     def __rmul__(self, other):
         """
-        Same as __mul__.
-        Allow the use of '*' with a preceding coef (numeric).
-        Like in 0.5 * LCPS.
+        Same as `__mul__`. Allow the use of `*` with a preceding numeric
+        coefficient. Example: `1/2 * PauliString`.
 
-        Args:
-            other (LinearCombinaisonPauliString): An other LCPS.
+        Parameters
+        ----------
+        other : LinearCombinaisonPauliString
+            An other LCPS.
 
-        Returns:
-            LinearCombinaisonPauliString: New LCPS of len = len(self) * len(other)
-            or
-            LinearCombinaisonPauliString: New LCPS of same length with modified coefs
+        Returns
+        -------
+        LinearCombinaisonPauliString/LinearCombinaisonPauliString
+            New LCPS of length `len(self) * len(other)` or a new LCPS of
+            same length with modified coefficients.
         """
-        
+
         return self.__mul__(other)
 
     def add_pauli_string_linear_combinaison(self, other):
         """
-        Adding with an other LCPS. Merging the coefs and PauliStrings arrays.
+        Adding with an other LCPS. Merging the coefficients and
+        `PauliStrings` arrays.
 
-        Args:
-            other (LinearCombinaisonPauliString): An other LCPS.
+        Parameters
+        ----------
+        other : LinearCombinaisonPauliString
+            An other LCPS.
 
-        Raises:
-            ValueError: If other is not an LCPS.
-            ValueError: If the other LCPS has not the same number of qubits.
+        Raises
+        ------
+        ValueError
+            If `other` is not an LCPS.
+        ValueError
+            If the other LCPS has not the same number of qubits.
 
-        Returns:
-            LinearCombinaisonPauliString: New LCPS of len = len(self) + len(other).
+        Returns
+        -------
+        LinearCombinaisonPauliString
+            New LCPS of length `len(self) + len(other)`.
         """
 
         if not isinstance(other,LinearCombinaisonPauliString):
@@ -455,15 +536,9 @@ class LinearCombinaisonPauliString(object):
         if self.n_qubits != other.n_qubits:
             raise ValueError('Can only add with LCPS of identical number of qubits')
 
-        new_coefs = new_pauli_strings = None
-
-        ################################################################################################################
-        # YOUR CODE HERE
-        # TO COMPLETE (after activity 3.1)
-        # Hints : use np.concatenate
+        # Activity 3.1.
         new_coefs = np.concatenate((self.coefs, other.coefs))
         new_pauli_strings = np.concatenate((self.pauli_strings, other.pauli_strings))
-        ################################################################################################################
 
         return self.__class__(new_coefs, new_pauli_strings)
 
@@ -471,15 +546,22 @@ class LinearCombinaisonPauliString(object):
         """
         Multiply with an other LCPS.
 
-        Args:
-            other (LinearCombinaisonPauliString): An other LCPS.
+        Parameters
+        ----------
+        other : LinearCombinaisonPauliString
+            An other LCPS.
 
-        Raises:
-            ValueError: If other is not an LCPS.
-            ValueError: If the other LCPS has not the same number of qubits.
+        Raises
+        ------
+        ValueError
+            If `other` is not an LCPS.
+        ValueError
+            If the other LCPS has not the same number of qubits.
 
-        Returns:
-            LinearCombinaisonPauliString: New LCPS of len = len(self) * len(other).
+        Returns
+        -------
+        LinearCombinaisonPauliString
+            New LCPS of length `len(self) * len(other)`.
         """
 
         if not isinstance(other, LinearCombinaisonPauliString):
@@ -490,12 +572,8 @@ class LinearCombinaisonPauliString(object):
 
         new_coefs = np.zeros((len(self)*len(other),), dtype=np.complex)
         new_pauli_strings = np.zeros((len(self)*len(other),), dtype=PauliString)
-        
-        ################################################################################################################
-        # YOUR CODE HERE
-        # TO COMPLETE (after activity 3.1)
-        ################################################################################################################
-        
+
+        # Activity 3.1.
         for i in range(self.n_terms):
             for j in range(other.n_terms):
                 new_pauli_strings[i * other.n_terms + j], phase = self.pauli_strings[i] * other.pauli_strings[j]
@@ -505,65 +583,67 @@ class LinearCombinaisonPauliString(object):
 
     def mul_coef(self,other):
         """
-        Multiply the LCPS by a coef (numeric) or an array of the same length.
+        Multiply the LCPS by a numeric coefficient or an array of the
+        same length.
 
-        Args:
-            other (float, complex or np.array): One numeric factor or one factor per PauliString.
+        Parameters
+        ----------
+        other : float/complex/np.array
+            One numeric factor or one factor per `PauliString`.
 
-        Raises:
-            ValueError: If other is np.array should be of the same length as the LCPS.
+        Raises
+        ------
+        ValueError
+            If `other` is `np.array`, it should be of the same length as
+            the LCPS.
 
-        Returns:
-            [type]: [description]
+        Returns
+        -------
+        LinearCombinaisonPauliString
+            New LCPS properly multiplied by the coefficients.
         """
 
-        new_coefs = new_pauli_strings = None
-
-        ################################################################################################################
-        # YOUR CODE HERE
-        # TO COMPLETE (after activity 3.1)
+        # Activity 3.1.
         if isinstance(other, np.ndarray):
             if len(other) != self.__len__():
                 raise ValueError("Array length does not equal length of LCPS!")
         new_coefs = self.coefs * other
         new_pauli_strings = self.pauli_strings
-        ################################################################################################################
 
         return self.__class__(new_coefs, new_pauli_strings)
 
     def to_zx_bits(self):
         """
-        Build an array that contains all the zx_bits for each PauliString.
+        Build an array that contains all the `zx_bits` for each `PauliString`.
 
-        Returns:
-            np.array<bool>: A 2d array of booleans where each line is the zx_bits of a PauliString.
+        Returns
+        -------
+        np.array<bool>
+            A two-dimensional array of booleans where each line is the
+            `zx_bits` of a `PauliString`.
         """
 
+        # Activity 3.1.
         zx_bits = np.zeros((len(self), 2*self.n_qubits), dtype=np.bool)
-
-        ################################################################################################################
-        # YOUR CODE HERE
-        # TO COMPLETE (after activity 3.1)
-        ################################################################################################################
         for i, ps in enumerate(self.pauli_strings):
             zx_bits[i, :] = ps.to_zx_bits()
-        
+
         return zx_bits
 
     def to_xz_bits(self):
         """
-        Build an array that contains all the xz_bits for each PauliString.
+        Build an array that contains all the `xz_bits` for each `PauliString`.
 
-        Returns:
-            np.array<bool>: A 2d array of booleans where each line is the xz_bits of a PauliString.
+        Returns
+        -------
+        np.array<bool>
+            A two-dimensional array of booleans where each line is the
+            `xz_bits` of a `PauliString`.
         """
 
         xz_bits = np.zeros((len(self), 2*self.n_qubits), dtype=np.bool)
 
-        ################################################################################################################
-        # YOUR CODE HERE
-        # TO COMPLETE (after activity 3.1)
-        ################################################################################################################
+        # Activity 3.1.
         for i, ps in enumerate(self.pauli_strings):
             xz_bits[i, :] = ps.to_xz_bits()
 
@@ -571,19 +651,19 @@ class LinearCombinaisonPauliString(object):
 
     def ids(self):
         """
-        Build an array that identifies the position of all the I for each PauliString.
+        Build an array that identifies the position of all the :math:`I`
+        for each PauliString.
 
-        Returns:
-            np.array<bool>: A 2d array of booleans where each line is the xz_bits of a PauliString.
+        Returns
+        -------
+        np.array<bool>
+            A two-dimensional array of booleans where each line is the
+            `xz_bits` of a `PauliString`.
         """
 
         ids = np.zeros((len(self), self.n_qubits), dtype=np.bool)
 
-        ################################################################################################################
-        # YOUR CODE HERE
-        # TO COMPLETE (after activity 3.1)
-        ################################################################################################################
-        
+        # Activity 3.1.
         for i, ps in enumerate(self.pauli_strings):
             ids[i, :] = ps.ids()
 
@@ -591,45 +671,45 @@ class LinearCombinaisonPauliString(object):
 
     def combine(self):
         """
-        Finds unique PauliStrings in the LCPS and combines the coefs of identical PauliStrings.
-        Reduces the length of the LCPS.
+        Finds unique `PauliStrings` in the LCPS and combines the
+        coefficients of identical `PauliStrings`. Reduces the length of
+        the LCPS.
 
-        Returns:
-            LinearCombinaisonPauliString: LCPS with combined coefficients.
+        Returns
+        -------
+        LinearCombinaisonPauliString
+            LCPS with combined coefficients.
         """
 
-        new_coefs = new_pauli_strings = None
-
-        ################################################################################################################
-        # YOUR CODE HERE
-        # TO COMPLETE (after activity 3.1)
-        # hint : make use to_zx_bits and np.unique
-        ################################################################################################################
+        # Activity 3.1.
         old_pauli_strings = self.to_zx_bits()
         new_pauli_strings_zx = np.unique(old_pauli_strings, axis=0)
-        new_pauli_strings = np.array([PauliString.from_zx_bits(zx) for zx in new_pauli_strings_zx], dtype=PauliString)
-        new_coefs = np.array([sum(self.coefs[(old_pauli_strings==u).all(axis=1)]) for u in new_pauli_strings_zx])
+        new_pauli_strings = np.array(
+            [PauliString.from_zx_bits(zx)
+             for zx in new_pauli_strings_zx], dtype=PauliString)
+        new_coefs = np.array(
+            [sum(self.coefs[(old_pauli_strings==u).all(axis=1)])
+             for u in new_pauli_strings_zx])
 
         return self.__class__(new_coefs, new_pauli_strings)
 
     def apply_threshold(self, threshold=1e-6):
         """
-        Remove PauliStrings with coefficients smaller then threshold.
+        Remove `PauliStrings` with coefficients smaller then threshold.
 
-        Args:
-            threshold (float, optional): PauliStrings with coef smaller than 'threshold' will be removed. 
-                                         Defaults to 1e-6.
+        Parameters
+        ----------
+        threshold : float, optional, default=1e-6
+            `PauliStrings` with coefficients smaller than `threshold`
+            will be removed.
 
-        Returns:
-            LinearCombinaisonPauliString: LCPS without coefficients smaller then threshold.
+        Returns
+        -------
+        LinearCombinaisonPauliString
+            LCPS without coefficients smaller then threshold.
         """
 
-        ################################################################################################################
-        # YOUR CODE HERE
-        # TO COMPLETE (after activity 3.1)
-        # Hint : create a np.array<bool> and use this array to get the subset of the lcps where this array is True
-        ################################################################################################################
-        
+        # Activity 3.1.
         new_lcps = self[np.abs(self.coefs) >= threshold]
 
         return new_lcps
@@ -638,20 +718,22 @@ class LinearCombinaisonPauliString(object):
         """
         Find bitwise commuting cliques in the LCPS.
 
-        Returns:
-            list<LinearCombinaisonPauliString>: List of LCPS where all elements of one LCPS bitwise commute with each
-                                                other.
+        Returns
+        -------
+        list<LinearCombinaisonPauliString>
+            List of LCPS where all elements of one LCPS bitwise commute
+            with each other.
         """
 
         cliques = list()
 
-        ################################################################################################################
+        #################################################################
         # YOUR CODE HERE
         # TO COMPLETE (after activity 3.2)
         # This one can be hard to implement
         # Use to_zx_bits
         # Transform all I into Z and look for unique PauliStrings
-        ################################################################################################################
+        #################################################################
 
         raise NotImplementedError()
 
@@ -659,47 +741,40 @@ class LinearCombinaisonPauliString(object):
 
     def sort(self):
         """
-        Sort the PauliStrings using I<X<Y<Z and with LSB on the left.
+        Sort the `PauliStrings` by order of the `zx_bits`.
 
-        Returns:
-            LinearCombinaisonPauliString: Sorted.
+        Returns
+        -------
+        LinearCombinaisonPauliString
+            Sorted.
         """
 
-        order = None
-
-        ################################################################################################################
-        # YOUR CODE HERE
-        # TO COMPLETE (after activity 3.1)
-        order = np.argsort([''.join((1*np.flip(bitstring)).astype(str)) for bitstring in self.to_zx_bits()])
+        # Activity 3.1.
+        order = np.argsort(
+            [''.join((1*np.flip(bitstring)).astype(str))
+             for bitstring in self.to_zx_bits()])
         #order = np.argsort([str(ps) for ps in self.pauli_strings])
-        ################################################################################################################
 
         new_coefs = self.coefs[order]
         new_pauli_strings = self.pauli_strings[order]
 
         return self.__class__(new_coefs, new_pauli_strings)
-    
+
     def to_matrix(self):
         """
         Build the total matrix representation of the LCPS.
 
-        Returns:
-            np.array<complex>: A 2**n side square matrix.
+        Returns
+        -------
+        np.array<complex>
+            A :math:`2**n` side square matrix.
         """
 
         size = 2**self.n_qubits
         matrix = np.zeros((size, size), dtype=np.complex)
 
-        ################################################################################################################
-        # YOUR CODE HERE (OPTIONAL)
-        # TO COMPLETE (after activity 3.1)
-        # Hints : sum all the matrices of all PauliStrings weighted by their coef
-        ################################################################################################################
-
+        # Activity 3.1.
         for i in range(self.n_terms):
             matrix += self.coefs[i]*self.pauli_strings[i].to_matrix()
 
         return matrix
-
-
-
