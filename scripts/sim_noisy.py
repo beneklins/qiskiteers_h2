@@ -38,9 +38,9 @@ varform_4qubits_1param.cx(1, 3)
 
 # H2 at ~ the equilibrium bond length (0.735 Angstrom)
 with open('Integrals_sto-3g_H2_d_0.7350_no_spin.npz', 'rb') as f:
-out = np.load(f)
-h1_load_no_spin = out['h1']
-h2_load_no_spin = out['h2']
+	out = np.load(f)
+	h1_load_no_spin = out['h1']
+	h2_load_no_spin = out['h2']
 molecular_hamiltonian = MolecularFermionicHamiltonian.from_integrals(h1_load_no_spin, h2_load_no_spin).include_spin()
 
 # map to the quantum computer

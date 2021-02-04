@@ -429,7 +429,7 @@ class MolecularFermionicHamiltonian(FermionicHamiltonian):
         return MolecularFermionicHamiltonian(new_one_body, new_two_body, self.with_spin)
 
     def include_spin(self):
-       """
+        """
         Transforms a spinless `FermionicHamiltonian` to include spin for both
         sub Hamiltonians.
         See `FermionicHamiltonian.include_spin`.
