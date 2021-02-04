@@ -23,17 +23,17 @@ class Evaluator(object):
         """
         An Evaluator allows to transform a LCPS into a callable function.
         The LCPS is not set at the initialization. The evaluator will build
-        the QuantumCircuit necessary to estimate the expected value of the
-        LCPS. Upon using the 'eval' method, it will execute these circuits and
+        the quantum circuit necessary to estimate the expected value of the
+        LCPS. Upon using the `eval` method, it will execute these circuits and
         interpret the results to return an estimate of the expected value of
         the LCPS.
 
         Parameters
         ----------
         varform : qiskit.QuantumCircuit
-            A paramatrized QuantumCircuit.
+            A parametrised QuantumCircuit.
         backend : qiskit.backend
-            A qiskit backend. Could be a simulator are an actual quantum computer.
+            A Qiskit backend. Could be a simulator are an actual quantum computer.
         execute_opts : dict, optional, default={}
             Optional arguments to be passed to the qiskit.execute function.
         measure_filter : qiskit.ignis...MeasureFilter, optional, default=None
